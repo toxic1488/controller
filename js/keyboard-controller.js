@@ -5,7 +5,7 @@ function Controller(){
 	var focused = false;
 	var target_element;
 	var actions = {};
-	var code = 0;
+
 
 	scope.enabled = false;
 	scope.keys;
@@ -20,7 +20,8 @@ function Controller(){
 			var _action = actions_to_bind[action];
 			actions[action] = {
 				keys: _action.keys,
-				enabled: _action.enabled !== undefined ? _action.enabled : false
+				enabled: _action.enabled !== undefined ? _action.enabled : true,
+				is_active: false
 			};
 		}
 
@@ -51,51 +52,71 @@ function Controller(){
 
 	function keyDown( event ){
 		//console.log("keyDown", event.keyCode );
+
 		for ( var action in actions){
-			for (var i = 0; i < actions[action].keys.length; i++) {
-				if( actions[action].keys[i] == event.keyCode) var activ = action;
+
+			var _action = actions[action];
+			var _keys = _action.keys;
+
+			for (var i = 0; i < _keys.length; i++) {
+
+				if( _keys[i] == event.keyCode && !_action.is_active ) {
+
+					_action.is_active = true;
+
+					if( _action.enabled ){
+
+						var key_event = new CustomEvent(scope.ACTION_ACTIVATED, {
+							detail: {
+								keyCode: event.keyCode,
+								action: action
+							}
+						});
+						// code = event.keyCode;
+						window.dispatchEvent( key_event );
+					}
+
+				}
 			}
 		}
-		var myEvent = new CustomEvent(scope.ACTION_ACTIVATED, {
-			detail: {
-				keyCode: event.keyCode,
-				action: activ
-			}
-		});
-		code = event.keyCode;
-		window.dispatchEvent( myEvent );
+
 	}
 
 	function keyUp( event ){
+
 		for ( var action in actions){
-			for (var i = 0; i < actions[action].keys.length; i++) {
-				if( actions[action].keys[i] == event.keyCode) var activ = action;
+
+			var _action = actions[action];
+			var _keys = _action.keys;
+
+			for (var i = 0; i < _keys.length; i++) {
+				if( _keys[i] == event.keyCode) {
+
+					_action.is_active = false;
+
+					if( _action.enabled ){
+
+						var key_event = new CustomEvent(scope.ACTION_DEACTIVATED, {
+							detail: {
+								keyCode: event.keyCode,
+								action: action
+							}
+						});
+
+						// code = 0;
+						window.dispatchEvent( key_event );
+					}
+
+				}
 			}
 		}
-		var myEvent = new CustomEvent(scope.ACTION_DEACTIVATED, {
-			detail: {
-				keyCode: event.keyCode,
-				action: activ
-			}
-		});
-		code = 0;
-		window.dispatchEvent( myEvent );
+
 	}
 
 	scope.isActionActive = function( action ){
-		var check = false;
-		if( actions[action] != null){ 
-			if( actions[action].enabled ) check = true;
-			for ( var _action in actions){
-				if( _action == action){
-					for (var i = 0; i < actions[_action].keys.length; i++) {
-						if( code == actions[_action].keys[i]) check = true;
-						//if ( actions[_action].keys[i] == keyDown) check = true;
-					}
-				}
-			}
-		}	
-		return check;
+		var _action = actions[action];
+		if( !_action ) return;	
+		return _action.is_active;
 	}
 
 	scope.isKeyPressed = function( keyCode ){
