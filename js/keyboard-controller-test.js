@@ -64,10 +64,11 @@ controller.bindActions (
 
 // EVENTS
 window.addEventListener( controller.ACTION_ACTIVATED, onActionActivated );
+window.addEventListener( controller.ACTION_DEACTIVATED, onActionDeActivated );
 
 function onActionActivated(e) {
 	
-	console.log("onActionActivated", e );
+	if( e.detail.action != undefined ) console.log("onActionActivated", e.detail.action );
 	
 	// switch( e.details.action ){
 	// 	case "jump":
@@ -80,6 +81,11 @@ function onActionActivated(e) {
 		square.style.background = "red";
 	}
 
+}
+
+function onActionDeActivated(e) {
+	
+	if( e.detail.action != undefined ) console.log("onActionDeActivated", e.detail.action );
 }
 //GAME STEP
 setInterval( gameStep, 40 );

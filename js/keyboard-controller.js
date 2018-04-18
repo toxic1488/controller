@@ -51,9 +51,15 @@ function Controller(){
 
 	function keyDown( event ){
 		//console.log("keyDown", event.keyCode );
+		for ( var action in actions){
+			for (var i = 0; i < actions[action].keys.length; i++) {
+				if( actions[action].keys[i] == event.keyCode) var activ = action;
+			}
+		}
 		var myEvent = new CustomEvent(scope.ACTION_ACTIVATED, {
 			detail: {
-				keyCode: event.keyCode
+				keyCode: event.keyCode,
+				action: activ
 			}
 		});
 		code = event.keyCode;
@@ -61,13 +67,19 @@ function Controller(){
 	}
 
 	function keyUp( event ){
-		// var myEvent = new CustomEvent(scope.ACTION_DEACTIVATED, {
-		// 	detail: {
-		// 		keyCode: event.keyCode
-		// 	}
-		// });
+		for ( var action in actions){
+			for (var i = 0; i < actions[action].keys.length; i++) {
+				if( actions[action].keys[i] == event.keyCode) var activ = action;
+			}
+		}
+		var myEvent = new CustomEvent(scope.ACTION_DEACTIVATED, {
+			detail: {
+				keyCode: event.keyCode,
+				action: activ
+			}
+		});
 		code = 0;
-		//window.dispatchEvent( myEvent );
+		window.dispatchEvent( myEvent );
 	}
 
 	scope.isActionActive = function( action ){
