@@ -1,9 +1,14 @@
 var controller = new Controller();
+var marginLeft = 0;
+var marginTop = 0;
 
 controller.bindActions (
 	{
 		"left":{
 			keys: [37, 65]
+		},
+		"jump":{
+			keys: [32]
 		},
 		"right":{
 			keys: [39, 68],
@@ -15,7 +20,46 @@ controller.bindActions (
 	}
 );
 
-controller.attach( window );
+
+
+	window.onload = function(){
+		document.getElementById('button_bind').onclick = function(){
+			controller.bindActions (
+				{
+					"up":{
+						keys: [38, 87]
+					},
+					"down":{
+						keys: [40, 83]
+					}
+				}
+			);
+		};
+
+		document.getElementById('button_en').onclick = function(){
+			controller.enableAction('right');
+		};
+
+		document.getElementById('button_dis').onclick = function(){
+			controller.disableAction('right');
+		};
+
+		document.getElementById('button_attach').onclick = function(){
+			controller.attach(window);
+		};
+
+		document.getElementById('button_detach').onclick = function(){
+			controller.detach(window);
+		};
+
+		document.getElementById('button_active').onclick = function(){
+			console.log(controller.isActionActive("right"));
+		};
+
+		document.getElementById('button_key').onclick = function(){
+			console.log(controller.isKeyPressed(39));
+		};
+	}
 
 
 // EVENTS
@@ -32,13 +76,13 @@ function onActionActivated(e) {
 	// 	default:
 	// 		console.log("sorry");
 	// }
-	if (controller.isActionActive("jump")){
+	if ( controller.isActionActive("jump") ){
 		square.style.background = "red";
 	}
+
 }
 //GAME STEP
 setInterval( gameStep, 40 );
-var marginLeft = 0;
 function gameStep(){
 	if( controller.isActionActive("left") ){
 		// move the box to the left
@@ -50,5 +94,15 @@ function gameStep(){
 		marginLeft +=10;
 	}
 
+	//optional
+	if( controller.isActionActive("up") ){
+		// move the box to the left
+		square.style.marginTop = marginTop - 10 + 'px';
+		marginTop -=10;
+	}else if( controller.isActionActive("down") ){
+		// move the box to the right
+		square.style.marginTop = marginTop + 10 + 'px';
+		marginTop +=10;
+	}
 }
-controller.disableAction("jump");
+//controller.disableAction("jump");

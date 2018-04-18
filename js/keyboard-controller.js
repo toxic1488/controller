@@ -28,11 +28,11 @@ function Controller(){
 	}
 
 	scope.enableAction = function( action_name ){
-		action_name.enabled = true;
+		if( actions[action_name]!= null ) actions[action_name].enabled = true;
 	}
 
 	scope.disableAction = function( action_name ){
-		action_name.enabled = false;
+		if( actions[action_name]!= null ) actions[action_name].enabled = false;
 	}
 
 	scope.attach = function( target, dont_enable ){
@@ -57,11 +57,10 @@ function Controller(){
 			}
 		});
 		code = event.keyCode;
-		//window.dispatchEvent( myEvent );
+		window.dispatchEvent( myEvent );
 	}
 
 	function keyUp( event ){
-		console.log("keyUp", event.keyCode );
 		// var myEvent = new CustomEvent(scope.ACTION_DEACTIVATED, {
 		// 	detail: {
 		// 		keyCode: event.keyCode
@@ -73,15 +72,17 @@ function Controller(){
 
 	scope.isActionActive = function( action ){
 		var check = false;
-		if( actions[action].enabled ) check = true;
-		for ( var _action in actions){
-			if( _action == action){
-				for (var i = 0; i < actions[_action].keys.length; i++) {
-					if( code == actions[_action].keys[i]) check = true;
-					//if ( actions[_action].keys[i] == keyDown) check = true;
+		if( actions[action] != null){ 
+			if( actions[action].enabled ) check = true;
+			for ( var _action in actions){
+				if( _action == action){
+					for (var i = 0; i < actions[_action].keys.length; i++) {
+						if( code == actions[_action].keys[i]) check = true;
+						//if ( actions[_action].keys[i] == keyDown) check = true;
+					}
 				}
 			}
-		}
+		}	
 		return check;
 	}
 
