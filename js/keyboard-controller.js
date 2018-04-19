@@ -26,6 +26,7 @@ function Controller(){
 			//console.log(_keys);
 			actions[action] = {
 				keys: _keys,
+				gestures: _action.gestures !== undefined ? _action.gestures : [],
 				enabled: _action.enabled !== undefined ? _action.enabled : true,
 				is_active: false
 			};
@@ -52,19 +53,29 @@ function Controller(){
 		target_element = target;
 		target_element.addEventListener("keydown", keyDown);
 		target_element.addEventListener("keyup", keyUp);
+		target_element.addEventListener("touchstart", handleTouchStart);
+		target_element.addEventListener("touchmove", handleTouchMove);
+		target_element.addEventListener("touchend", handleTouchStop);
 
 	}
 
 	scope.detach = function(){
+		
 		if( target_element!= null) {
 
 			console.log("detach");
 			target_element.removeEventListener("keydown", keyDown);
 			target_element.removeEventListener("keyup", keyUp);
+			target_element.removeEventListener("touchstart", handleTouchStart);
+			target_element.removeEventListener("touchmove", handleTouchMove);
+			target_element.removeEventListener("touchend", handleTouchStop);
 			target_element = null;
 		} else {
+
 			console.log("nothing to detach");
+
 		}
+
 	}
 
 	function keyDown( event ){
@@ -135,6 +146,103 @@ function Controller(){
 
 	}
 
+	var xDown = null;
+	var yDown = null;
+	var gesture;
+
+	function handleTouchStart(event) {
+		xDown = event.touches[0].clientX;
+		yDown = event.touches[0].clientY;
+	};
+
+	function handleTouchMove(event) {
+		if ( ! xDown || ! yDown ) {
+			return;
+		}
+
+		var xUp = event.touches[0].clientX;
+		var yUp = event.touches[0].clientY;
+
+		var xDiff = xDown - xUp;
+		var yDiff = yDown - yUp;
+
+		if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {
+			
+			if ( xDiff > 0 ) {
+				//left swipe 
+				gesture = "swipe_left";
+			} else {
+				//right swipe
+				gesture = "swipe_right";
+			}
+		} else {
+
+			if ( yDiff > 0 ) {
+				//up swipe 
+				gesture = "swipe_up";
+			} else {
+				//down swipe 
+				gesture = "swipe_down";
+			}
+		}
+
+		for ( var action in actions){
+
+			var _action = actions[action];
+			var _gestures = _action.gestures;
+
+			for (var i = 0; i < _gestures.length; i++) {
+
+				if( _gestures[i] == gesture && _action.enabled){
+
+					_action.is_active = true;
+
+					var gesture_event = new CustomEvent(scope.ACTION_ACTIVATED, {
+						detail: {
+							action: action
+						}
+					});
+
+					window.dispatchEvent( gesture_event );
+				}
+			}
+		}
+
+		//reset values
+		xDown = null;
+		yDown = null;
+
+
+	};
+
+	function handleTouchStop(event) {
+		var xUp = event.changedTouches[0].clientX;
+		var yUp = event.changedTouches[0].clientY;
+
+		for ( var action in actions){
+
+			var _action = actions[action];
+			var _gestures = _action.gestures;
+
+			for (var i = 0; i < _gestures.length; i++) {
+
+				if( _gestures[i] == gesture && _action.enabled){
+
+					_action.is_active = false;
+
+					var gesture_event = new CustomEvent(scope.ACTION_DEACTIVATED, {
+						detail: {
+							action: action
+						}
+					});
+
+					window.dispatchEvent( gesture_event );
+				}
+			}
+		}
+
+	};
+
 	scope.isActionActive = function( action ){
 		var _action = actions[action];
 		if( !_action ) return;	
@@ -154,6 +262,7 @@ function Controller(){
 
 		return false;
 	}
+
 
 	return scope;
 }

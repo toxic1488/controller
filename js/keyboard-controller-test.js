@@ -3,13 +3,15 @@ var controller = new Controller();
 controller.bindActions (
 	{
 		"left":{
-			keys: [37, 65]
+			keys: [37, 65],
+			gestures: ["swipe_left"]
 		},
 		"jump":{
 			keys: [32]
 		},
 		"right":{
 			keys: [39, 68],
+			gestures: ["swipe_right"]
 			//enabled: false
 		}
 	}
@@ -26,10 +28,12 @@ window.onload = function(){
 		controller.bindActions (
 			{
 				"up":{
-					keys: [38, 87]
+					keys: [38, 87],
+					gestures: ["swipe_up"]
 				},
 				"down":{
-					keys: [40, 83]
+					keys: [40, 83],
+					gestures: ["swipe_down"]
 				}
 			}
 		);
@@ -58,6 +62,13 @@ window.onload = function(){
 	document.getElementById('button_key').onclick = function(){
 		console.log(controller.isKeyPressed(39));
 	};
+
+	// controller.setEnabled({
+	// 	keyboard: true,
+	// 	mouse: true,
+	// 	touch: !true
+	// });
+
 }
 
 
