@@ -8,18 +8,24 @@ function Controller(){
 
 
 	scope.enabled = false;
-	scope.keys;
 	scope.ACTION_ACTIVATED = "controls:action-activated";
 	scope.ACTION_DEACTIVATED = "controls:action-deactivated";
 
-	// if(!event) var event = window.event;
 
 	scope.bindActions = function( actions_to_bind ){
 		
 		for ( var action in actions_to_bind){
 			var _action = actions_to_bind[action];
+			var _keys = {};
+			for (var i = 0; i < _action.keys.length; i++) {
+				_keys[i] = {
+					key: _action.keys[i],
+					pressed: false
+					}
+			}
+			//console.log(_keys);
 			actions[action] = {
-				keys: _action.keys,
+				keys: _keys,
 				enabled: _action.enabled !== undefined ? _action.enabled : true,
 				is_active: false
 			};
@@ -29,11 +35,17 @@ function Controller(){
 	}
 
 	scope.enableAction = function( action_name ){
-		if( actions[action_name]!= null ) actions[action_name].enabled = true;
+		if( actions[action_name]!= null ) {
+			actions[action_name].enabled = true;
+			//actions[action_name].is_active = true;
+		}
 	}
 
 	scope.disableAction = function( action_name ){
-		if( actions[action_name]!= null ) actions[action_name].enabled = false;
+		if( actions[action_name]!= null ) {
+			actions[action_name].enabled = false;
+			actions[action_name].is_active = false;
+		}
 	}
 
 	scope.attach = function( target, dont_enable ){
@@ -44,27 +56,34 @@ function Controller(){
 	}
 
 	scope.detach = function(){
-		console.log("detach");
-		target_element.removeEventListener("keydown", keyDown);
-		target_element.removeEventListener("keyup", keyUp);
-		target_element = null;
+		if( target_element!= null) {
+
+			console.log("detach");
+			target_element.removeEventListener("keydown", keyDown);
+			target_element.removeEventListener("keyup", keyUp);
+			target_element = null;
+		} else {
+			console.log("nothing to detach");
+		}
 	}
 
 	function keyDown( event ){
-		//console.log("keyDown", event.keyCode );
 
 		for ( var action in actions){
 
 			var _action = actions[action];
 			var _keys = _action.keys;
 
-			for (var i = 0; i < _keys.length; i++) {
+			for (var i in _keys) {
 
-				if( _keys[i] == event.keyCode && !_action.is_active ) {
+				if( _keys[i].key == event.keyCode && !_action.is_active ) {
 
-					_action.is_active = true;
+					
+					_keys[i].pressed = true;
 
 					if( _action.enabled ){
+
+						_action.is_active = true;
 
 						var key_event = new CustomEvent(scope.ACTION_ACTIVATED, {
 							detail: {
@@ -72,7 +91,7 @@ function Controller(){
 								action: action
 							}
 						});
-						// code = event.keyCode;
+
 						window.dispatchEvent( key_event );
 					}
 
@@ -89,12 +108,16 @@ function Controller(){
 			var _action = actions[action];
 			var _keys = _action.keys;
 
-			for (var i = 0; i < _keys.length; i++) {
-				if( _keys[i] == event.keyCode) {
+			for (var i in _keys) {
 
-					_action.is_active = false;
+				if( _keys[i].key == event.keyCode) {
+
+					
+					_keys[i].pressed = false;
 
 					if( _action.enabled ){
+
+						_action.is_active = false;
 
 						var key_event = new CustomEvent(scope.ACTION_DEACTIVATED, {
 							detail: {
@@ -103,7 +126,6 @@ function Controller(){
 							}
 						});
 
-						// code = 0;
 						window.dispatchEvent( key_event );
 					}
 
@@ -120,7 +142,17 @@ function Controller(){
 	}
 
 	scope.isKeyPressed = function( keyCode ){
-		return code == keyCode;
+
+		for ( var action in actions){
+
+			var _keys = actions[action].keys;
+
+			for (var i in _keys) {
+				if( _keys[i].key == keyCode && _keys[i].pressed) return true;
+			}
+		}
+
+		return false;
 	}
 
 	return scope;

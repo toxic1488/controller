@@ -1,6 +1,4 @@
 var controller = new Controller();
-// var marginLeft = 0;
-// var marginTop = 0;
 
 controller.bindActions (
 	{
@@ -12,10 +10,7 @@ controller.bindActions (
 		},
 		"right":{
 			keys: [39, 68],
-			enabled: false
-		},
-		"jump":{
-			keys: [32]
+			//enabled: false
 		}
 	}
 );
@@ -73,14 +68,6 @@ window.addEventListener( controller.ACTION_DEACTIVATED, onActionDeActivated );
 function onActionActivated(e) {
 	
 	console.log("onActionActivated", e.detail.action );
-	
-	// switch( e.details.action ){
-	// 	case "jump":
-	// 		// move the box to the left
-	// 		break;
-	// 	default:
-	// 		console.log("sorry");
-	// }
 
 	if ( e.detail.action === "jump" ){
 		square.style.background = ["red","blue","yellow","green"][~~(Math.random()*4)];
@@ -98,26 +85,26 @@ function onActionDeActivated(e) {
 setInterval( gameStep, 40 );
 
 function gameStep(){
-	// console.log(square.style);
+
 	if( controller.isActionActive("left") ){
 		// move the box to the left
 		square.style.marginLeft = (parseInt(square.style.marginLeft) - 10) + 'px';
-		// marginLeft -=10;
+
 	}else if( controller.isActionActive("right") ){
 		// move the box to the right
 		square.style.marginLeft = (parseInt(square.style.marginLeft) + 10) + 'px';
-		// marginLeft +=10;
+
 	}
 
 	//optional
 	if( controller.isActionActive("up") ){
-		// move the box to the left
+		// move the box to the top
 		square.style.marginTop = (parseInt(square.style.marginTop) - 10) + 'px';
-		// marginTop -=10;
+
 	}else if( controller.isActionActive("down") ){
-		// move the box to the right
+		// move the box to the bottom
 		square.style.marginTop = (parseInt(square.style.marginTop) + 10) + 'px';
-		// marginTop +=10;
+
 	}
 }
 //controller.disableAction("jump");
