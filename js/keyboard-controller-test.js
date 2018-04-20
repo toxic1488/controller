@@ -17,51 +17,90 @@ controller.bindActions (
 	}
 );
 
-
-
+	
+var square = document.createElement('div');
 window.onload = function(){
 
+	var buttons = new Array(7);
+
+	for (var i = 0; i < buttons.length; i++){
+
+		buttons[i] = document.createElement('input');
+		buttons[i].type = 'button';
+		buttons[i].id = 'button' + i;
+		document.body.appendChild(buttons[i]);
+		document.getElementById(buttons[i].id).onclick = function(){
+			out(+this.id[this.id.length - 1]);
+		}
+	}
+	
+
+	square.style.display = 'block';
+	square.style.width = '50px';
+	square.style.height = '50px';
+	square.style.background = 'black';
+	square.style.position = 'absolute';
+	square.style.top = '100px';
+	square.style.left = '300px';
 	square.style.marginLeft = 0;
 	square.style.marginTop = 0;
+	document.body.appendChild(square);
 
-	document.getElementById('button_bind').onclick = function(){
-		controller.bindActions (
-			{
-				"up":{
-					keys: [38, 87],
-					gestures: ["swipe_up"]
-				},
-				"down":{
-					keys: [40, 83],
-					gestures: ["swipe_down"]
-				}
-			}
-		);
-	};
+	buttons[0].value = 'bindActions';
+	buttons[1].value = 'enableAction';
+	buttons[2].value = 'disableAction';
+	buttons[3].value = 'attach';
+	buttons[4].value = 'detach';
+	buttons[5].value = 'isActionActive';
+	buttons[6].value = 'isKeyPressed';
 
-	document.getElementById('button_en').onclick = function(){
-		controller.enableAction('right');
-	};
+	function out( number ) {
 
-	document.getElementById('button_dis').onclick = function(){
-		controller.disableAction('right');
-	};
+		switch (number){
 
-	document.getElementById('button_attach').onclick = function(){
-		controller.attach(window);
-	};
+			case 0:
+				controller.bindActions (
+					{
+						"up":{
+							keys: [38, 87],
+							gestures: ["swipe_up"]
+						},
+						"down":{
+							keys: [40, 83],
+							gestures: ["swipe_down"]
+						}
+					}
+				);
+				break;
 
-	document.getElementById('button_detach').onclick = function(){
-		controller.detach(window);
-	};
+			case 1:
+				controller.enableAction('right');
+				break;
 
-	document.getElementById('button_active').onclick = function(){
-		console.log(controller.isActionActive("right"));
-	};
+			case 2:
+				controller.disableAction('right');
+				break;
 
-	document.getElementById('button_key').onclick = function(){
-		console.log(controller.isKeyPressed(39));
-	};
+			case 3:
+				controller.attach(window);
+				break;
+
+			case 4:
+				controller.detach(window);
+				break;
+
+			case 5:
+				console.log(controller.isActionActive("right"));
+				break;
+
+			case 6:
+				console.log(controller.isKeyPressed(39));
+				break;
+
+			default:
+				return;
+		}
+	}
 
 	// controller.setEnabled({
 	// 	keyboard: true,

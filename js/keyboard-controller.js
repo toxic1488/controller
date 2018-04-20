@@ -167,7 +167,7 @@ function Controller(){
 		var yDiff = yDown - yUp;
 
 		if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {
-			
+
 			if ( xDiff > 0 ) {
 				//left swipe 
 				gesture = "swipe_left";
@@ -263,6 +263,8 @@ function Controller(){
 		return false;
 	}
 
-
+	// scope.setEnabled = function(enables_to_set) {
+		
+	// }
 	return scope;
 }
