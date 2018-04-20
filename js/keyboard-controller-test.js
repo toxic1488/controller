@@ -105,6 +105,22 @@ function onActionActivated(e) {
 	if ( e.detail.action === "jump" ){
 		square.style.background = ["red","blue","yellow","green"][~~(Math.random()*4)];
 	}
+	if ( e.detail.devicetype === "swipeble" ){
+		switch ( e.detail.action){
+			case "left":
+				square.style.marginLeft = (parseInt(square.style.marginLeft) - 30) + 'px';
+				break;
+			case "right":
+				square.style.marginLeft = (parseInt(square.style.marginLeft) + 30) + 'px';
+				break;
+			case "up":
+				square.style.marginTop = (parseInt(square.style.marginTop) - 30) + 'px';
+				break;
+			case "down":
+				square.style.marginTop = (parseInt(square.style.marginTop) + 30) + 'px';
+				break;
+		}
+	}
 
 }
 

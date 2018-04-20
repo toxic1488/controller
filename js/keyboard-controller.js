@@ -31,8 +31,8 @@ function Controller(){
 				is_active: false
 			};
 		}
-
 		console.log("binded actions", actions);
+
 	}
 
 	scope.enableAction = function( action_name ){
@@ -50,14 +50,13 @@ function Controller(){
 	}
 
 	scope.attach = function( target, dont_enable ){
+
 		target_element = target;
 		target_element.addEventListener("keydown", keyDown);
 		target_element.addEventListener("keyup", keyUp);
 		target_element.addEventListener("touchstart", handleTouchStart);
-		target_element.addEventListener("touchmove", handleTouchMove);
 		target_element.addEventListener("touchend", handleTouchStop);
 		target_element.addEventListener("mousedown", mouseTouchStart);
-		target_element.addEventListener("mousemove", mouseTouchMove);
 		target_element.addEventListener("mouseup", mouseTouchStop);
 
 	}
@@ -70,10 +69,8 @@ function Controller(){
 			target_element.removeEventListener("keydown", keyDown);
 			target_element.removeEventListener("keyup", keyUp);
 			target_element.removeEventListener("touchstart", handleTouchStart);
-			target_element.removeEventListener("touchmove", handleTouchMove);
 			target_element.removeEventListener("touchend", handleTouchStop);
 			target_element.removeEventListener("mousedown", mouseTouchStart);
-			target_element.removeEventListener("mousemove", mouseTouchMove);
 			target_element.removeEventListener("mouseup", mouseTouchStop);
 			target_element = null;
 		} else {
@@ -84,16 +81,41 @@ function Controller(){
 
 	}
 
-	function keyDown( event ){
+	scope.isActionActive = function( action ){
+		var _action = actions[action];
+		if( !_action ) return;	
+		return _action.is_active;
+	}
 
-		keyEvent(scope.ACTION_ACTIVATED, true);
+	scope.isKeyPressed = function( keyCode ){
+
+		for ( var action in actions){
+
+			var _keys = actions[action].keys;
+
+			for (var i in _keys) {
+				if( _keys[i].key == keyCode && _keys[i].pressed) return true;
+			}
+		}
+
+		return false;
 
 	}
 
+	scope.setEnabled = function( enables_to_set ){
+		enabledDevices = {
+			keyboard: enables_to_set.keyboard !== undefined ? enables_to_set.keyboard : true,
+			mouse: enables_to_set.mouse !== undefined ? enables_to_set.mouse : true,
+			touch: enables_to_set.touch !== undefined ? enables_to_set.touch : true
+		}
+	}
+
+	function keyDown( event ){
+		keyEvent(scope.ACTION_ACTIVATED, true);
+	}
+
 	function keyUp( event ){
-
 		keyEvent(scope.ACTION_DEACTIVATED, false);
-
 	}
 
 	function keyEvent( event_name, check ){
@@ -112,15 +134,7 @@ function Controller(){
 					if( _action.enabled && enabledDevices.keyboard){
 
 						_action.is_active = check;
-
-						var key_event = new CustomEvent(event_name, {
-							detail: {
-								keyCode: event.keyCode,
-								action: action
-							}
-						});
-
-						window.dispatchEvent( key_event );
+						createCustomEvent( event_name, action, "keyboard");
 					}
 
 				}
@@ -136,31 +150,21 @@ function Controller(){
 	function handleTouchStart( event ) {
 		//event.preventDefault();
 		swipeStart( event.touches[0]);
-	};
-
-	function handleTouchMove( event ) {
-		//event.preventDefault();
-		swipeMove( event.touches[0], enabledDevices.touch, ["swipe_left", "swipe_right", "swipe_up", "swipe_down"] );
-	};
+	}
 
 	function handleTouchStop( event ) {
 		//event.preventDefault();
-		swipeStop( event, enabledDevices.touch);
+		swipeStop( event.changedTouches[0], enabledDevices.touch, ["swipe_left", "swipe_right", "swipe_up", "swipe_down"]);
 
-	};
+	}
 
 	//MOUSE
 	function mouseTouchStart( event ) {
 		swipeStart( event );
-	};
-
-	function mouseTouchMove( event ) {
-		swipeMove( event, enabledDevices.mouse, ["mouse_swipe_left", "mouse_swipe_right", "mouse_swipe_up", "mouse_swipe_down"] );
-
 	}
 
 	function mouseTouchStop( event ) {
-		swipeStop( event, enabledDevices.mouse);
+		swipeStop( event, enabledDevices.mouse, ["mouse_swipe_left", "mouse_swipe_right", "mouse_swipe_up", "mouse_swipe_down"]);
 	}
 
 	//HELPFUNCTION
@@ -169,8 +173,8 @@ function Controller(){
 		yDown = eventType.clientY;
 	}
 
-	function swipeMove( eventType, device, gesturesArray ){
-		
+	function swipeStop( eventType, device, gesturesArray ){
+
 		if ( ! xDown || ! yDown ) {
 			return;
 		}
@@ -202,14 +206,10 @@ function Controller(){
 		}
 
 		gestureEvent ( scope.ACTION_ACTIVATED, device, true);
-	}
-
-	function swipeStop( eventType, device){
-		// var xUp = eventType.clientX;
-		// var yUp = eventType.clientY;
 		gestureEvent ( scope.ACTION_DEACTIVATED, device, false);
 		
 		gesture = null;
+
 	}
 
 	function gestureEvent( event_name, device, check ){
@@ -224,48 +224,28 @@ function Controller(){
 				if( _gestures[i] == gesture && _action.enabled && device){
 
 					_action.is_active = check;
-
-					var gesture_event = new CustomEvent(event_name, {
-						detail: {
-							action: action
-						}
-					});
-
-					window.dispatchEvent( gesture_event );
+					createCustomEvent( event_name, action, "swipeble");
 				}
 			}
 		}
 
 		xDown = null;
 		yDown = null;
+
 	}
 
-	scope.isActionActive = function( action ){
-		var _action = actions[action];
-		if( !_action ) return;	
-		return _action.is_active;
+	function createCustomEvent( event_name, action, devicetype ){
+
+		var gesture_event = new CustomEvent(event_name, {
+						detail: {
+							action: action,
+							devicetype: devicetype
+						}
+					});
+
+		window.dispatchEvent( gesture_event );
+
 	}
 
-	scope.isKeyPressed = function( keyCode ){
-
-		for ( var action in actions){
-
-			var _keys = actions[action].keys;
-
-			for (var i in _keys) {
-				if( _keys[i].key == keyCode && _keys[i].pressed) return true;
-			}
-		}
-
-		return false;
-	}
-
-	scope.setEnabled = function( enables_to_set ){
-		enabledDevices = {
-			keyboard: enables_to_set.keyboard !== undefined ? enables_to_set.keyboard : true,
-			mouse: enables_to_set.mouse !== undefined ? enables_to_set.mouse : true,
-			touch: enables_to_set.touch !== undefined ? enables_to_set.touch : true
-		}
-	}
 	return scope;
 }
