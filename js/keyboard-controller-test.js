@@ -102,11 +102,11 @@ window.onload = function(){
 		}
 	}
 
-	// controller.setEnabled({
-	// 	keyboard: true,
-	// 	mouse: true,
-	// 	touch: !true
-	// });
+	controller.setEnabled({
+		keyboard: !true,
+		mouse: true,
+		touch: true
+	});
 
 }
 

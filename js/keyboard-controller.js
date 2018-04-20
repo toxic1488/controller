@@ -5,9 +5,9 @@ function Controller(){
 	var focused = false;
 	var target_element;
 	var actions = {};
+	var enabledDevises;
 
 
-	scope.enabled = false;
 	scope.ACTION_ACTIVATED = "controls:action-activated";
 	scope.ACTION_DEACTIVATED = "controls:action-deactivated";
 
@@ -92,7 +92,7 @@ function Controller(){
 					
 					_keys[i].pressed = true;
 
-					if( _action.enabled ){
+					if( _action.enabled && enabledDevises.keyboard){
 
 						_action.is_active = true;
 
@@ -126,7 +126,7 @@ function Controller(){
 					
 					_keys[i].pressed = false;
 
-					if( _action.enabled ){
+					if( _action.enabled && enabledDevises.keyboard){
 
 						_action.is_active = false;
 
@@ -150,12 +150,12 @@ function Controller(){
 	var yDown = null;
 	var gesture;
 
-	function handleTouchStart(event) {
+	function handleTouchStart( event ) {
 		xDown = event.touches[0].clientX;
 		yDown = event.touches[0].clientY;
 	};
 
-	function handleTouchMove(event) {
+	function handleTouchMove( event ) {
 		if ( ! xDown || ! yDown ) {
 			return;
 		}
@@ -193,7 +193,7 @@ function Controller(){
 
 			for (var i = 0; i < _gestures.length; i++) {
 
-				if( _gestures[i] == gesture && _action.enabled){
+				if( _gestures[i] == gesture && _action.enabled && enabledDevises.touch){
 
 					_action.is_active = true;
 
@@ -215,7 +215,7 @@ function Controller(){
 
 	};
 
-	function handleTouchStop(event) {
+	function handleTouchStop( event ) {
 		var xUp = event.changedTouches[0].clientX;
 		var yUp = event.changedTouches[0].clientY;
 
@@ -226,7 +226,7 @@ function Controller(){
 
 			for (var i = 0; i < _gestures.length; i++) {
 
-				if( _gestures[i] == gesture && _action.enabled){
+				if( _gestures[i] == gesture && _action.enabled && enabledDevises.touch){
 
 					_action.is_active = false;
 
@@ -263,8 +263,12 @@ function Controller(){
 		return false;
 	}
 
-	// scope.setEnabled = function(enables_to_set) {
-		
-	// }
+	scope.setEnabled = function( enables_to_set ){
+		enabledDevises = {
+			keyboard: enables_to_set.keyboard !== undefined ? enables_to_set.keyboard : true,
+			mouse: enables_to_set.mouse !== undefined ? enables_to_set.mouse : true,
+			touch: enables_to_set.touch !== undefined ? enables_to_set.touch : true
+		}
+	}
 	return scope;
 }
