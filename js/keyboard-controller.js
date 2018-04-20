@@ -23,7 +23,6 @@ function Controller(){
 					pressed: false
 					}
 			}
-			//console.log(_keys);
 			actions[action] = {
 				keys: _keys,
 				gestures: _action.gestures !== undefined ? _action.gestures : [],
@@ -154,7 +153,7 @@ function Controller(){
 
 	function handleTouchStop( event ) {
 		//event.preventDefault();
-		swipeStop( event.changedTouches[0], enabledDevices.touch, ["swipe_left", "swipe_right", "swipe_up", "swipe_down"]);
+		swipeStop( event.changedTouches[0], enabledDevices.touch, ["swipe_left", "swipe_right", "swipe_up", "swipe_down", "tap"]);
 
 	}
 
@@ -164,7 +163,7 @@ function Controller(){
 	}
 
 	function mouseTouchStop( event ) {
-		swipeStop( event, enabledDevices.mouse, ["mouse_swipe_left", "mouse_swipe_right", "mouse_swipe_up", "mouse_swipe_down"]);
+		swipeStop( event, enabledDevices.mouse, ["mouse_swipe_left", "mouse_swipe_right", "mouse_swipe_up", "mouse_swipe_down", "click"]);
 	}
 
 	//HELPFUNCTION
@@ -204,6 +203,7 @@ function Controller(){
 				gesture = gesturesArray[3];
 			}
 		}
+		if (Math.abs( xDiff ) <= 2 && Math.abs( yDiff ) <= 2) gesture = gesturesArray[4];
 
 		gestureEvent ( scope.ACTION_ACTIVATED, device, true);
 		gestureEvent ( scope.ACTION_DEACTIVATED, device, false);

@@ -7,7 +7,8 @@ controller.bindActions (
 			gestures: ["swipe_left", "mouse_swipe_left"]
 		},
 		"jump":{
-			keys: [32]
+			keys: [32],
+			gestures: ["tap", "click"]
 		},
 		"right":{
 			keys: [39, 68],
