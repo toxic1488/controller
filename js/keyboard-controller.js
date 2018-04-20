@@ -56,6 +56,9 @@ function Controller(){
 		target_element.addEventListener("touchstart", handleTouchStart);
 		target_element.addEventListener("touchmove", handleTouchMove);
 		target_element.addEventListener("touchend", handleTouchStop);
+		target_element.addEventListener("mousedown", mouseTouchStart);
+		target_element.addEventListener("mousemove", mouseTouchMove);
+		target_element.addEventListener("mouseup", mouseTouchStop);
 
 	}
 
@@ -69,6 +72,9 @@ function Controller(){
 			target_element.removeEventListener("touchstart", handleTouchStart);
 			target_element.removeEventListener("touchmove", handleTouchMove);
 			target_element.removeEventListener("touchend", handleTouchStop);
+			target_element.removeEventListener("mousedown", mouseTouchStart);
+			target_element.removeEventListener("mousemove", mouseTouchMove);
+			target_element.removeEventListener("mouseup", mouseTouchStop);
 			target_element = null;
 		} else {
 
@@ -150,6 +156,7 @@ function Controller(){
 	var yDown = null;
 	var gesture;
 
+	//TOUCH
 	function handleTouchStart( event ) {
 		xDown = event.touches[0].clientX;
 		yDown = event.touches[0].clientY;
@@ -212,7 +219,6 @@ function Controller(){
 		xDown = null;
 		yDown = null;
 
-
 	};
 
 	function handleTouchStop( event ) {
@@ -240,7 +246,104 @@ function Controller(){
 				}
 			}
 		}
+		gesture = null;
 
+	};
+
+	//MOUSE
+	function mouseTouchStart( event ) {
+		xDown = event.clientX;
+		yDown = event.clientY;
+	};
+
+	function mouseTouchMove( event ) {
+		if ( ! xDown || ! yDown ) {
+			return;
+		}
+
+		var xUp = event.clientX;
+		var yUp = event.clientY;
+
+		var xDiff = xDown - xUp;
+		var yDiff = yDown - yUp;
+
+		if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {
+
+			if ( xDiff > 0 ) {
+				//left swipe 
+				gesture = "mouse_swipe_left";
+			} else {
+				//right swipe
+				gesture = "mouse_swipe_right";
+			}
+		} else {
+
+			if ( yDiff > 0 ) {
+				//up swipe 
+				gesture = "mouse_swipe_up";
+			} else {
+				//down swipe 
+				gesture = "mouse_swipe_down";
+			}
+		}
+
+		for ( var action in actions){
+
+			var _action = actions[action];
+			var _gestures = _action.gestures;
+
+			for (var i = 0; i < _gestures.length; i++) {
+
+				if( _gestures[i] == gesture && _action.enabled && enabledDevises.mouse){
+
+					_action.is_active = true;
+
+					var gesture_event = new CustomEvent(scope.ACTION_ACTIVATED, {
+						detail: {
+							action: action
+						}
+					});
+
+					window.dispatchEvent( gesture_event );
+				}
+			}
+		}
+
+		xDown = null;
+		yDown = null;
+
+	};
+
+
+	function mouseTouchStop( event ) {
+		var xUp = event.clientX;
+		var yUp = event.clientY;
+
+		for ( var action in actions){
+
+			var _action = actions[action];
+			var _gestures = _action.gestures;
+
+			for (var i = 0; i < _gestures.length; i++) {
+
+				if( _gestures[i] == gesture && _action.enabled && enabledDevises.mouse){
+
+					_action.is_active = false;
+
+					var gesture_event = new CustomEvent(scope.ACTION_DEACTIVATED, {
+						detail: {
+							action: action
+						}
+					});
+
+					window.dispatchEvent( gesture_event );
+				}
+			}
+		}
+
+		gesture = null;
+		xDown = null;
+		yDown = null;
 	};
 
 	scope.isActionActive = function( action ){

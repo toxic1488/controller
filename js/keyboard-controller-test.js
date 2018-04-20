@@ -4,14 +4,14 @@ controller.bindActions (
 	{
 		"left":{
 			keys: [37, 65],
-			gestures: ["swipe_left"]
+			gestures: ["swipe_left", "mouse_swipe_left"]
 		},
 		"jump":{
 			keys: [32]
 		},
 		"right":{
 			keys: [39, 68],
-			gestures: ["swipe_right"]
+			gestures: ["swipe_right", "mouse_swipe_right"]
 			//enabled: false
 		}
 	}
@@ -63,11 +63,11 @@ window.onload = function(){
 					{
 						"up":{
 							keys: [38, 87],
-							gestures: ["swipe_up"]
+							gestures: ["swipe_up", "mouse_swipe_up"]
 						},
 						"down":{
 							keys: [40, 83],
-							gestures: ["swipe_down"]
+							gestures: ["swipe_down", "mouse_swipe_down"]
 						}
 					}
 				);
@@ -103,8 +103,8 @@ window.onload = function(){
 	}
 
 	controller.setEnabled({
-		keyboard: !true,
-		mouse: true,
+		keyboard: true,
+		mouse: !true,
 		touch: true
 	});
 
