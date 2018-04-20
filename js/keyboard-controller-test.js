@@ -21,20 +21,8 @@ controller.bindActions (
 var square = document.createElement('div');
 window.onload = function(){
 
-	var buttons = new Array(7);
 
-	for (var i = 0; i < buttons.length; i++){
-
-		buttons[i] = document.createElement('input');
-		buttons[i].type = 'button';
-		buttons[i].id = 'button' + i;
-		document.body.appendChild(buttons[i]);
-		document.getElementById(buttons[i].id).onclick = function(){
-			out(+this.id[this.id.length - 1]);
-		}
-	}
-	
-
+	// SQUARE
 	square.style.display = 'block';
 	square.style.width = '50px';
 	square.style.height = '50px';
@@ -46,65 +34,60 @@ window.onload = function(){
 	square.style.marginTop = 0;
 	document.body.appendChild(square);
 
-	buttons[0].value = 'bindActions';
-	buttons[1].value = 'enableAction';
-	buttons[2].value = 'disableAction';
-	buttons[3].value = 'attach';
-	buttons[4].value = 'detach';
-	buttons[5].value = 'isActionActive';
-	buttons[6].value = 'isKeyPressed';
 
-	function out( number ) {
-
-		switch (number){
-
-			case 0:
-				controller.bindActions (
-					{
-						"up":{
-							keys: [38, 87],
-							gestures: ["swipe_up", "mouse_swipe_up"]
-						},
-						"down":{
-							keys: [40, 83],
-							gestures: ["swipe_down", "mouse_swipe_down"]
-						}
-					}
-				);
-				break;
-
-			case 1:
-				controller.enableAction('right');
-				break;
-
-			case 2:
-				controller.disableAction('right');
-				break;
-
-			case 3:
-				controller.attach(window);
-				break;
-
-			case 4:
-				controller.detach(window);
-				break;
-
-			case 5:
-				console.log(controller.isActionActive("right"));
-				break;
-
-			case 6:
-				console.log(controller.isKeyPressed(39));
-				break;
-
-			default:
-				return;
-		}
+	// TEST BUTTONS
+	function initButton( button_name, buttonAction ){
+		var button = document.createElement('input');
+		button.value = button_name;
+		button.type = 'button';
+		button.onclick = buttonAction;
+		document.body.appendChild(button);
 	}
 
+	//
+	initButton( 'bindActions', function(){
+		controller.bindActions (
+			{
+				"up":{
+					keys: [38, 87],
+					gestures: ["swipe_up", "mouse_swipe_up"]
+				},
+				"down":{
+					keys: [40, 83],
+					gestures: ["swipe_down", "mouse_swipe_down"]
+				}
+			}
+		);
+	});
+
+	initButton( 'enableAction', function(){
+		controller.enableAction('right');
+	});
+
+	initButton( 'disableAction', function(){
+		controller.disableAction('right');
+	});
+
+	initButton( 'attach', function(){
+		controller.attach(window);
+	});
+
+	initButton( 'detach', function(){
+		controller.detach('right');
+	});
+
+	initButton( 'isActionActive', function(){
+		console.log(controller.isActionActive("right"));
+	});
+
+	initButton( 'isKeyPressed', function(){
+		console.log(controller.isKeyPressed(39));
+	});
+
+	// Start Controller
 	controller.setEnabled({
 		keyboard: true,
-		mouse: !true,
+		mouse: true,
 		touch: true
 	});
 

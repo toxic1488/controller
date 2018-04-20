@@ -5,7 +5,7 @@ function Controller(){
 	var focused = false;
 	var target_element;
 	var actions = {};
-	var enabledDevises;
+	var enabledDevices;
 
 
 	scope.ACTION_ACTIVATED = "controls:action-activated";
@@ -86,40 +86,18 @@ function Controller(){
 
 	function keyDown( event ){
 
-		for ( var action in actions){
-
-			var _action = actions[action];
-			var _keys = _action.keys;
-
-			for (var i in _keys) {
-
-				if( _keys[i].key == event.keyCode && !_action.is_active ) {
-
-					
-					_keys[i].pressed = true;
-
-					if( _action.enabled && enabledDevises.keyboard){
-
-						_action.is_active = true;
-
-						var key_event = new CustomEvent(scope.ACTION_ACTIVATED, {
-							detail: {
-								keyCode: event.keyCode,
-								action: action
-							}
-						});
-
-						window.dispatchEvent( key_event );
-					}
-
-				}
-			}
-		}
+		keyEvent(scope.ACTION_ACTIVATED, true);
 
 	}
 
 	function keyUp( event ){
 
+		keyEvent(scope.ACTION_DEACTIVATED, false);
+
+	}
+
+	function keyEvent( event_name, check ){
+
 		for ( var action in actions){
 
 			var _action = actions[action];
@@ -127,16 +105,15 @@ function Controller(){
 
 			for (var i in _keys) {
 
-				if( _keys[i].key == event.keyCode) {
+				if( _keys[i].key == event.keyCode && (check ? !_action.is_active : _action.is_active) ) {
 
-					
-					_keys[i].pressed = false;
+					_keys[i].pressed = check;
 
-					if( _action.enabled && enabledDevises.keyboard){
+					if( _action.enabled && enabledDevices.keyboard){
 
-						_action.is_active = false;
+						_action.is_active = check;
 
-						var key_event = new CustomEvent(scope.ACTION_DEACTIVATED, {
+						var key_event = new CustomEvent(event_name, {
 							detail: {
 								keyCode: event.keyCode,
 								action: action
@@ -149,7 +126,6 @@ function Controller(){
 				}
 			}
 		}
-
 	}
 
 	var xDown = null;
@@ -158,111 +134,49 @@ function Controller(){
 
 	//TOUCH
 	function handleTouchStart( event ) {
-		xDown = event.touches[0].clientX;
-		yDown = event.touches[0].clientY;
+		//event.preventDefault();
+		swipeStart( event.touches[0]);
 	};
 
 	function handleTouchMove( event ) {
-		if ( ! xDown || ! yDown ) {
-			return;
-		}
-
-		var xUp = event.touches[0].clientX;
-		var yUp = event.touches[0].clientY;
-
-		var xDiff = xDown - xUp;
-		var yDiff = yDown - yUp;
-
-		if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {
-
-			if ( xDiff > 0 ) {
-				//left swipe 
-				gesture = "swipe_left";
-			} else {
-				//right swipe
-				gesture = "swipe_right";
-			}
-		} else {
-
-			if ( yDiff > 0 ) {
-				//up swipe 
-				gesture = "swipe_up";
-			} else {
-				//down swipe 
-				gesture = "swipe_down";
-			}
-		}
-
-		for ( var action in actions){
-
-			var _action = actions[action];
-			var _gestures = _action.gestures;
-
-			for (var i = 0; i < _gestures.length; i++) {
-
-				if( _gestures[i] == gesture && _action.enabled && enabledDevises.touch){
-
-					_action.is_active = true;
-
-					var gesture_event = new CustomEvent(scope.ACTION_ACTIVATED, {
-						detail: {
-							action: action
-						}
-					});
-
-					window.dispatchEvent( gesture_event );
-				}
-			}
-		}
-
-		//reset values
-		xDown = null;
-		yDown = null;
-
+		//event.preventDefault();
+		swipeMove( event.touches[0], enabledDevices.touch, ["swipe_left", "swipe_right", "swipe_up", "swipe_down"] );
 	};
 
 	function handleTouchStop( event ) {
-		var xUp = event.changedTouches[0].clientX;
-		var yUp = event.changedTouches[0].clientY;
-
-		for ( var action in actions){
-
-			var _action = actions[action];
-			var _gestures = _action.gestures;
-
-			for (var i = 0; i < _gestures.length; i++) {
-
-				if( _gestures[i] == gesture && _action.enabled && enabledDevises.touch){
-
-					_action.is_active = false;
-
-					var gesture_event = new CustomEvent(scope.ACTION_DEACTIVATED, {
-						detail: {
-							action: action
-						}
-					});
-
-					window.dispatchEvent( gesture_event );
-				}
-			}
-		}
-		gesture = null;
+		//event.preventDefault();
+		swipeStop( event, enabledDevices.touch);
 
 	};
 
 	//MOUSE
 	function mouseTouchStart( event ) {
-		xDown = event.clientX;
-		yDown = event.clientY;
+		swipeStart( event );
 	};
 
 	function mouseTouchMove( event ) {
+		swipeMove( event, enabledDevices.mouse, ["mouse_swipe_left", "mouse_swipe_right", "mouse_swipe_up", "mouse_swipe_down"] );
+
+	}
+
+	function mouseTouchStop( event ) {
+		swipeStop( event, enabledDevices.mouse);
+	}
+
+	//HELPFUNCTION
+	function swipeStart( eventType){
+		xDown = eventType.clientX;
+		yDown = eventType.clientY;
+	}
+
+	function swipeMove( eventType, device, gesturesArray ){
+		
 		if ( ! xDown || ! yDown ) {
 			return;
 		}
 
-		var xUp = event.clientX;
-		var yUp = event.clientY;
+		var xUp = eventType.clientX;
+		var yUp = eventType.clientY;
 
 		var xDiff = xDown - xUp;
 		var yDiff = yDown - yUp;
@@ -271,80 +185,60 @@ function Controller(){
 
 			if ( xDiff > 0 ) {
 				//left swipe 
-				gesture = "mouse_swipe_left";
+				gesture = gesturesArray[0];
 			} else {
 				//right swipe
-				gesture = "mouse_swipe_right";
+				gesture = gesturesArray[1];
 			}
 		} else {
 
 			if ( yDiff > 0 ) {
 				//up swipe 
-				gesture = "mouse_swipe_up";
+				gesture = gesturesArray[2];
 			} else {
 				//down swipe 
-				gesture = "mouse_swipe_down";
+				gesture = gesturesArray[3];
 			}
 		}
 
-		for ( var action in actions){
+		gestureEvent ( scope.ACTION_ACTIVATED, device, true);
+	}
 
-			var _action = actions[action];
-			var _gestures = _action.gestures;
-
-			for (var i = 0; i < _gestures.length; i++) {
-
-				if( _gestures[i] == gesture && _action.enabled && enabledDevises.mouse){
-
-					_action.is_active = true;
-
-					var gesture_event = new CustomEvent(scope.ACTION_ACTIVATED, {
-						detail: {
-							action: action
-						}
-					});
-
-					window.dispatchEvent( gesture_event );
-				}
-			}
-		}
-
-		xDown = null;
-		yDown = null;
-
-	};
-
-
-	function mouseTouchStop( event ) {
-		var xUp = event.clientX;
-		var yUp = event.clientY;
-
-		for ( var action in actions){
-
-			var _action = actions[action];
-			var _gestures = _action.gestures;
-
-			for (var i = 0; i < _gestures.length; i++) {
-
-				if( _gestures[i] == gesture && _action.enabled && enabledDevises.mouse){
-
-					_action.is_active = false;
-
-					var gesture_event = new CustomEvent(scope.ACTION_DEACTIVATED, {
-						detail: {
-							action: action
-						}
-					});
-
-					window.dispatchEvent( gesture_event );
-				}
-			}
-		}
-
+	function swipeStop( eventType, device){
+		// var xUp = eventType.clientX;
+		// var yUp = eventType.clientY;
+		gestureEvent ( scope.ACTION_DEACTIVATED, device, false);
+		
 		gesture = null;
+	}
+
+	function gestureEvent( event_name, device, check ){
+
+		for ( var action in actions){
+
+			var _action = actions[action];
+			var _gestures = _action.gestures;
+
+			for (var i = 0; i < _gestures.length; i++) {
+
+				if( _gestures[i] == gesture && _action.enabled && device){
+
+					_action.is_active = check;
+
+					var gesture_event = new CustomEvent(event_name, {
+						detail: {
+							action: action
+						}
+					});
+
+					window.dispatchEvent( gesture_event );
+				}
+			}
+		}
+
 		xDown = null;
 		yDown = null;
-	};
+	}
 
 	scope.isActionActive = function( action ){
 		var _action = actions[action];
@@ -367,7 +261,7 @@ function Controller(){
 	}
 
 	scope.setEnabled = function( enables_to_set ){
-		enabledDevises = {
+		enabledDevices = {
 			keyboard: enables_to_set.keyboard !== undefined ? enables_to_set.keyboard : true,
 			mouse: enables_to_set.mouse !== undefined ? enables_to_set.mouse : true,
 			touch: enables_to_set.touch !== undefined ? enables_to_set.touch : true
