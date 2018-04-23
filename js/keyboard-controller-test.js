@@ -88,7 +88,7 @@ window.onload = function(){
 	// Start Controller
 	controller.setEnabled({
 		keyboard: true,
-		mouse: true,
+		mouse: !true,
 		touch: true
 	});
 
@@ -132,7 +132,7 @@ function onActionDeActivated(e) {
 
 
 //GAME STEP
-setInterval( gameStep, 40 );
+// setInterval( gameStep, 40 );
 
 function gameStep(){
 

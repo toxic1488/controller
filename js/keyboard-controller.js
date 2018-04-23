@@ -49,7 +49,8 @@ function Controller(){
 	}
 
 	scope.attach = function( target, dont_enable ){
-
+		console.log("attach");
+		scope.detach();
 		target_element = target;
 		target_element.addEventListener("keydown", keyDown);
 		target_element.addEventListener("keyup", keyUp);
@@ -144,22 +145,25 @@ function Controller(){
 	var xDown = null;
 	var yDown = null;
 	var gesture;
-	var tapStarted;
+	var latest_tap;
+	var is_double_tap = false;
 
 	//TOUCH
 	function handleTouchStart( event ) {
-		//event.preventDefault();
+		event.preventDefault();
+		console.log("touchstart");
 		swipeStart( event.touches[0]);
 	}
 
 	function handleTouchStop( event ) {
-		//event.preventDefault();
+		event.preventDefault();
 		swipeStop( event.changedTouches[0], enabledDevices.touch, ["swipe_left", "swipe_right", "swipe_up", "swipe_down", "tap"]);
 
 	}
 
 	//MOUSE
 	function mouseTouchStart( event ) {
+		console.log("mouseTouchStart");
 		swipeStart( event );
 	}
 
@@ -171,24 +175,27 @@ function Controller(){
 	function swipeStart( eventType){
 		xDown = eventType.clientX;
 		yDown = eventType.clientY;
-		tapStarted = new Date().getTime();
+		console.log("start");
+		var now = new Date().getTime();
+		var delta_time = now - latest_tap
+		if ((delta_time < 600) && (delta_time > 0)) {
+			is_double_tap = true;
+		}else{
+			is_double_tap = false;
+		}
+		latest_tap = now;
 	}
 
 	function swipeStop( eventType, device, gesturesArray ){
 
-		if ( ! xDown || ! yDown ) {
-			return;
-		}
-
+		console.log("stop");
 		var xUp = eventType.clientX;
 		var yUp = eventType.clientY;
 
 		var xDiff = xDown - xUp;
 		var yDiff = yDown - yUp;
 
-		var tapStopped = new Date().getTime();
-		var tapTime = tapStopped - tapStarted;
-		
+
 		if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {
 
 			if ( xDiff > 0 ) {
@@ -209,10 +216,11 @@ function Controller(){
 			}
 		}
 		if (Math.abs( xDiff ) <= 2 && Math.abs( yDiff ) <= 2){
-			if (tapTime > 1500){
+			if (is_double_tap){
 				gesture = gesturesArray[4];
-			}else 
-			gesture = null;
+			}else{
+				gesture = null;
+			}
 		}
 
 		gestureEvent ( scope.ACTION_ACTIVATED, device, true);
