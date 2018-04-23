@@ -144,6 +144,7 @@ function Controller(){
 	var xDown = null;
 	var yDown = null;
 	var gesture;
+	var tapStarted;
 
 	//TOUCH
 	function handleTouchStart( event ) {
@@ -170,6 +171,7 @@ function Controller(){
 	function swipeStart( eventType){
 		xDown = eventType.clientX;
 		yDown = eventType.clientY;
+		tapStarted = new Date().getTime();
 	}
 
 	function swipeStop( eventType, device, gesturesArray ){
@@ -184,6 +186,9 @@ function Controller(){
 		var xDiff = xDown - xUp;
 		var yDiff = yDown - yUp;
 
+		var tapStopped = new Date().getTime();
+		var tapTime = tapStopped - tapStarted;
+		
 		if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {
 
 			if ( xDiff > 0 ) {
@@ -203,7 +208,12 @@ function Controller(){
 				gesture = gesturesArray[3];
 			}
 		}
-		if (Math.abs( xDiff ) <= 2 && Math.abs( yDiff ) <= 2) gesture = gesturesArray[4];
+		if (Math.abs( xDiff ) <= 2 && Math.abs( yDiff ) <= 2){
+			if (tapTime > 1500){
+				gesture = gesturesArray[4];
+			}else 
+			gesture = null;
+		}
 
 		gestureEvent ( scope.ACTION_ACTIVATED, device, true);
 		gestureEvent ( scope.ACTION_DEACTIVATED, device, false);
